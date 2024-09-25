@@ -28,13 +28,40 @@ function! s:bdelete(action, bang, buffer_name)
 		execute window . "wincmd w"
 
 		" Bprevious also wraps around the buffer list, if necessary:
-		try | exe bufnr("#") > 0 && buflisted(bufnr("#")) ? "buffer #" : "bprevious"
+		" try | exe bufnr("#") > 0 && buflisted(bufnr("#")) ? "buffer #" : "bprevious"
+		" catch /^Vim([^)]*):E85:/ " E85: There is no listed buffer
+		" endtry
+		try
+			if bufnr("#") > 0 && bufnr("#") != buffer && buflisted(bufnr("#")) && getbufvar(bufnr("#"), '&ft') != 'qf'
+				" If # buffer is listed and not quickfix switch to it
+				buffer #
+				" echom 'swith to alt'
+				break
+			endif
+			" Emulate bprevious but excluding quickfix buffers
+			" listed buffer that are not quickfix buffers:
+			let buffers = map(filter(getbufinfo({'buflisted':1}), "getbufvar(v:val.bufnr, '&ft') != 'qf'"), "v:val.bufnr")
+			let buffers = filter(buffers, "v:val < buffer")
+			if len(buffers)
+					execute "buffer " . buffers[-1]
+					" echom 'swith to previous'
+					break
+			endif
+			let buffers = map(filter(getbufinfo({'buflisted':1}), "getbufvar(v:val.bufnr, '&ft') != 'qf'"), "v:val.bufnr")
+			let buffers = filter(buffers, "v:val > buffer")
+			" Emulate bprevious but excluding quickfix buffers
+			if len(buffers)
+					execute "buffer " . buffers[-1]
+					" echom 'swith to last'
+					break
+			endif
 		catch /^Vim([^)]*):E85:/ " E85: There is no listed buffer
 		endtry
 
 		" If found a new buffer for this window, mission accomplished:
-		if bufnr("%") != buffer | continue | endif
+		if bufnr("%") != buffer | break | endif
 
+		" Otherwise create an empty buffer
 		call s:new(a:bang)
 	endfor
 

@@ -36,7 +36,7 @@ function! s:bdelete(action, bang, buffer_name)
 				" If # buffer is listed and not quickfix switch to it
 				buffer #
 				" echom 'swith to alt'
-				break
+				continue
 			endif
 			" Emulate bprevious but excluding quickfix buffers
 			" listed buffer that are not quickfix buffers:
@@ -45,7 +45,7 @@ function! s:bdelete(action, bang, buffer_name)
 			if len(buffers)
 					execute "buffer " . buffers[-1]
 					" echom 'swith to previous'
-					break
+					continue
 			endif
 			let buffers = map(filter(getbufinfo({'buflisted':1}), "getbufvar(v:val.bufnr, '&ft') != 'qf'"), "v:val.bufnr")
 			let buffers = filter(buffers, "v:val > buffer")
@@ -53,13 +53,13 @@ function! s:bdelete(action, bang, buffer_name)
 			if len(buffers)
 					execute "buffer " . buffers[-1]
 					" echom 'swith to last'
-					break
+					continue
 			endif
 		catch /^Vim([^)]*):E85:/ " E85: There is no listed buffer
 		endtry
 
 		" If found a new buffer for this window, mission accomplished:
-		if bufnr("%") != buffer | break | endif
+		if bufnr("%") != buffer | continue | endif
 
 		" Otherwise create an empty buffer
 		call s:new(a:bang)

@@ -43,17 +43,17 @@ function! s:bdelete(action, bang, buffer_name)
 			let buffers = map(filter(getbufinfo({'buflisted':1}), "getbufvar(v:val.bufnr, '&ft') != 'qf'"), "v:val.bufnr")
 			let buffers = filter(buffers, "v:val < buffer")
 			if len(buffers)
-					execute "buffer " . buffers[-1]
-					" echom 'swith to previous'
-					continue
+				execute "buffer " . buffers[-1]
+				" echom 'swith to previous'
+				continue
 			endif
 			let buffers = map(filter(getbufinfo({'buflisted':1}), "getbufvar(v:val.bufnr, '&ft') != 'qf'"), "v:val.bufnr")
 			let buffers = filter(buffers, "v:val > buffer")
 			" Emulate bprevious but excluding quickfix buffers
 			if len(buffers)
-					execute "buffer " . buffers[-1]
-					" echom 'swith to last'
-					continue
+				execute "buffer " . buffers[-1]
+				" echom 'swith to last'
+				continue
 			endif
 		catch /^Vim([^)]*):E85:/ " E85: There is no listed buffer
 		endtry
